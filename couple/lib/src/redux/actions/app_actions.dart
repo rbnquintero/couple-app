@@ -5,4 +5,6 @@ class InitApp {
   InitApp(this.context);
 }
 
+enum AppInit { started, success, error }
+
 class AppInitialized {}

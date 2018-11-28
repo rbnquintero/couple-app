@@ -4,7 +4,8 @@ class UserState {
   String sessionId;
   User user;
 
-  UserState({this.authenticated = false, this.state = 0, this.sessionId, this.user});
+  UserState(
+      {this.authenticated = false, this.state = 0, this.sessionId, this.user});
 
   @override
   String toString() {
@@ -31,11 +32,16 @@ class User {
   }
 
   static User fromJson(Map<String, dynamic> json) => User(
-        id: json["objectId"],
-        nombre: json["name"],
-        email: json["email"],
-      );
+      id: json["objectId"],
+      nombre: json["name"],
+      email: json["email"],
+      password: json["password"]);
 
-  Map<String, dynamic> toJson() =>
-      {'name': nombre, 'email': email, 'password': password, 'username': email};
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': nombre,
+        'email': email,
+        'password': password,
+        'username': email
+      };
 }

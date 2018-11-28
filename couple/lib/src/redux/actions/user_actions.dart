@@ -13,8 +13,13 @@ class UserLogin {
   UserLogin(this.context, this.user);
 }
 
-enum UserRegisterSteps { begin, success, error }
+class UserLoad {
+  final BuildContext context;
+  UserLoad(this.context);
+}
 
+enum UserLoadSteps { begin, success, error }
+enum UserRegisterSteps { begin, success, error }
 enum UserLoginSteps { begin, success, error }
 
 class UserLoggedIn {
