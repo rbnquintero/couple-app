@@ -16,10 +16,16 @@ List<Middleware<AppState>> createStoreUserMiddleware() {
   final createUser = _createUser();
   final loginUser = _loginUser();
   final loadUser = _loadUser();
+  final loadUserFromApi = _loadUserFromServer();
+  final sendInvite = _sendInvite();
+  final checkInvite = _checkInvite();
   return [
     TypedMiddleware<AppState, UserRegister>(createUser),
     TypedMiddleware<AppState, UserLogin>(loginUser),
     TypedMiddleware<AppState, UserLoad>(loadUser),
+    TypedMiddleware<AppState, UserLoadFromApi>(loadUserFromApi),
+    TypedMiddleware<AppState, UserSendInvite>(sendInvite),
+    TypedMiddleware<AppState, UserCheckInvite>(checkInvite),
   ];
 }
 
@@ -33,7 +39,8 @@ Middleware<AppState> _loadUser() {
         String sessionId = perfilMap['sessionId'];
         User user = User.fromJson(perfilMap['user']);
         store.dispatch(UserLoggedIn(user, sessionId));
-        Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
+        //Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
+        store.dispatch(UserLoadFromApi(user, action.context));
       }
       store.dispatch(AppInitialized());
     });
@@ -86,7 +93,8 @@ Middleware<AppState> _loginUser() {
         String sessionId = responseMap['sessionToken'];
         User user = User.fromJson(responseMap);
         store.dispatch(UserLoggedIn(user, sessionId));
-        Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
+        store.dispatch(UserCheckInvite(user, action.context));
+        //Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
 
         // We save it locally
         Map<String, dynamic> profileStorage = Map();
@@ -97,6 +105,87 @@ Middleware<AppState> _loginUser() {
         store.dispatch(UserLoginSteps.error);
       }
     });
+    next(action);
+  };
+}
+
+Middleware<AppState> _loadUserFromServer() {
+  return (Store<AppState> store, action, NextDispatcher next) {
+    store.dispatch(UserApiLoadSteps.begin);
+    User user = action.user;
+
+    String url = Environment.parseUrl + Environment.uriUser + "/${user.id}";
+    http.get(url, headers: Environment.parseHeaders).then((response) {
+      print("#########");
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+      if (response.statusCode == 200) {
+        store.dispatch(UserApiLoadSteps.success);
+
+        Map<String, dynamic> responseMap = json.decode(response.body);
+        User user = User.fromJson(responseMap);
+        String sessionId = store.state.userState.sessionId;
+        store.dispatch(UserLoggedIn(user, sessionId));
+
+        // We save it locally
+        Map<String, dynamic> profileStorage = Map();
+        profileStorage["sessionId"] = sessionId;
+        profileStorage["user"] = user.toJson();
+        LocalRepository.setPerfil(profileStorage);
+
+        store.dispatch(UserCheckInvite(user, action.context));
+      } else {
+        store.dispatch(UserApiLoadSteps.error);
+      }
+    });
+
+    next(action);
+  };
+}
+
+Middleware<AppState> _sendInvite() {
+  return (Store<AppState> store, action, NextDispatcher next) {
+    store.dispatch(UserSendingInvite.begin);
+    User user = action.user.cloneUser();
+    user.invite = action.invite;
+
+    String url = Environment.parseUrl + Environment.uriUser + "/${user.id}";
+    Map<String, String> headers = Environment.parseHeaders;
+    headers["X-Parse-Session-Token"] = store.state.userState.sessionId;
+    http
+        .put(url, headers: headers, body: json.encode(user.toJsonForApi()))
+        .then((response) {
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+      if (response.statusCode == 200) {
+        store.dispatch(UserSendingInvite.success);
+        store.dispatch(UserUpdate(user));
+      } else {
+        store.dispatch(UserSendingInvite.error);
+      }
+    }).catchError((error) {
+      print(error);
+    });
+
+    next(action);
+  };
+}
+
+Middleware<AppState> _checkInvite() {
+  return (Store<AppState> store, action, NextDispatcher next) {
+    var email = store.state.userState.user.email;
+    String url = Environment.parseUrl +
+        Environment.uriUserQuery +
+        "?where={\"invite\": \"$email\"}";
+    print(url);
+    http.get(url, headers: Environment.parseHeaders).then((response) {
+      print(response);
+
+      Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
+    }).catchError((error) {
+      print(error);
+    });
+
     next(action);
   };
 }

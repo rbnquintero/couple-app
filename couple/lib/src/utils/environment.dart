@@ -4,6 +4,7 @@ class Environment {
   static final String parseUrl = 'https://parseapi.back4app.com/';
   static final String uriUser = 'users';
   static final String uriLogin = 'login';
+  static final String uriUserQuery = 'classes/_User';
   static final Map<String, String> parseHeaders = {
     'X-Parse-Application-Id': Environment.appId,
     'X-Parse-REST-API-Key': Environment.restApiKey,

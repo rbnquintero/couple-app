@@ -6,6 +6,7 @@ import 'package:couple/src/redux/model/user_state.dart';
 Reducer<UserState> userReducer = combineReducers<UserState>([
   new TypedReducer<UserState, UserLoggedIn>(userLoggedIn),
   new TypedReducer<UserState, UserLoginSteps>(userLogInState),
+  new TypedReducer<UserState, UserUpdate>(userUpdated),
 ]);
 
 UserState userLogInState(UserState userState, UserLoginSteps step) {
@@ -28,5 +29,13 @@ UserState userLogInState(UserState userState, UserLoginSteps step) {
 UserState userLoggedIn(UserState userState, UserLoggedIn action) {
   UserState userState = UserState(
       authenticated: true, sessionId: action.sessionId, user: action.user);
+  return userState;
+}
+
+UserState userUpdated(UserState userOldState, UserUpdate action) {
+  UserState userState = UserState(
+      authenticated: userOldState.authenticated,
+      sessionId: userOldState.sessionId,
+      user: action.user);
   return userState;
 }

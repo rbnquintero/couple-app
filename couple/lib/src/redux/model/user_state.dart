@@ -18,13 +18,27 @@ class User {
   String email;
   String nombre;
   String password;
+  String invite;
+  String partnerId;
 
   User({
     this.id,
     this.email,
     this.nombre,
     this.password,
+    this.invite,
+    this.partnerId,
   });
+
+  User cloneUser() {
+    return User(
+        id: this.id,
+        email: this.email,
+        nombre: this.nombre,
+        password: this.password,
+        invite: this.invite,
+        partnerId: this.partnerId);
+  }
 
   @override
   String toString() {
@@ -32,16 +46,28 @@ class User {
   }
 
   static User fromJson(Map<String, dynamic> json) => User(
-      id: json["objectId"],
+      id: json["objectId"] != null ? json["objectId"] : json["id"],
       nombre: json["name"],
-      email: json["email"],
-      password: json["password"]);
+      email: json["email"] != null ? json["email"] : json["username"],
+      password: json["password"],
+      invite: json["invite"],
+      partnerId: json["partnerId"]);
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': nombre,
         'email': email,
         'password': password,
-        'username': email
+        'username': email,
+        'invite': invite,
+        'partnerId': partnerId,
+      };
+
+  Map<String, dynamic> toJsonForApi() => {
+        'name': nombre,
+        'email': email,
+        'username': email,
+        'invite': invite,
+        'partnerId': partnerId,
       };
 }

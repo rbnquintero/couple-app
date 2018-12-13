@@ -18,12 +18,37 @@ class UserLoad {
   UserLoad(this.context);
 }
 
+class UserLoadFromApi {
+  final User user;
+  final BuildContext context;
+  UserLoadFromApi(this.user, this.context);
+}
+
+class UserSendInvite {
+  final User user;
+  final String invite;
+  UserSendInvite(this.user, this.invite);
+}
+
 enum UserLoadSteps { begin, success, error }
 enum UserRegisterSteps { begin, success, error }
 enum UserLoginSteps { begin, success, error }
+enum UserApiLoadSteps { begin, success, error }
+enum UserSendingInvite { begin, success, error }
 
 class UserLoggedIn {
   final User user;
   final String sessionId;
   UserLoggedIn(this.user, this.sessionId);
+}
+
+class UserCheckInvite {
+  final User user;
+  final BuildContext context;
+  UserCheckInvite(this.user, this.context);
+}
+
+class UserUpdate {
+  final User user;
+  UserUpdate(this.user);
 }
