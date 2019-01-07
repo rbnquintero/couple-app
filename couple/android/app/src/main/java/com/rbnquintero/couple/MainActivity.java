@@ -1,4 +1,4 @@
-package com.example.couple;
+package com.rbnquintero.couple;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

@@ -52,3 +52,11 @@ class UserUpdate {
   final User user;
   UserUpdate(this.user);
 }
+
+class UserInvitedUpdate {
+  final User invitedFrom;
+  final bool connected;
+  UserInvitedUpdate(this.invitedFrom, this.connected);
+}
+
+class UserAcceptInvite {}

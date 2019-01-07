@@ -7,4 +7,7 @@ class InitApp {
 
 enum AppInit { started, success, error }
 
-class AppInitialized {}
+class AppInitialized {
+  final BuildContext context;
+  AppInitialized(this.context);
+}

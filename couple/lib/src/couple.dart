@@ -4,6 +4,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 
 import 'package:couple/src/redux/model/app_state.dart';
 import 'package:couple/src/views/login.dart';
+import 'package:couple/src/views/pair.dart';
 import 'package:couple/src/views/home.dart';
 import 'package:couple/src/redux/actions/app_actions.dart';
 
@@ -23,9 +24,12 @@ class Couple extends StatelessWidget {
           case "/login":
             return CustomRoute(
                 builder: (_) => LoginScreen(), settings: settings);
+          case "/pair":
+            return CustomRoute(
+                builder: (_) => PairScreen(), settings: settings);
           case "/home":
             return CustomRoute(
-                builder: (_) => HomeScreen(), settings: settings);
+                builder: (_) => Home(), settings: settings);
         }
         assert(false);
       },

@@ -6,10 +6,10 @@ import 'dart:convert';
 import 'package:couple/src/utils/environment.dart';
 import 'package:couple/src/redux/model/app_state.dart';
 import 'package:couple/src/redux/actions/user_actions.dart';
-import 'package:couple/src/views/home.dart';
 import 'package:couple/src/redux/model/user_state.dart';
 import 'package:couple/src/utils/repository.dart';
 import 'package:couple/src/redux/actions/app_actions.dart';
+import 'package:couple/src/redux/actions/msg_actions.dart';
 import 'package:couple/src/views/login.dart';
 
 List<Middleware<AppState>> createStoreUserMiddleware() {
@@ -19,6 +19,7 @@ List<Middleware<AppState>> createStoreUserMiddleware() {
   final loadUserFromApi = _loadUserFromServer();
   final sendInvite = _sendInvite();
   final checkInvite = _checkInvite();
+  final acceptInvite = _acceptInvite();
   return [
     TypedMiddleware<AppState, UserRegister>(createUser),
     TypedMiddleware<AppState, UserLogin>(loginUser),
@@ -26,6 +27,7 @@ List<Middleware<AppState>> createStoreUserMiddleware() {
     TypedMiddleware<AppState, UserLoadFromApi>(loadUserFromApi),
     TypedMiddleware<AppState, UserSendInvite>(sendInvite),
     TypedMiddleware<AppState, UserCheckInvite>(checkInvite),
+    TypedMiddleware<AppState, UserAcceptInvite>(acceptInvite),
   ];
 }
 
@@ -39,10 +41,8 @@ Middleware<AppState> _loadUser() {
         String sessionId = perfilMap['sessionId'];
         User user = User.fromJson(perfilMap['user']);
         store.dispatch(UserLoggedIn(user, sessionId));
-        //Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
         store.dispatch(UserLoadFromApi(user, action.context));
       }
-      store.dispatch(AppInitialized());
     });
   };
 }
@@ -93,8 +93,11 @@ Middleware<AppState> _loginUser() {
         String sessionId = responseMap['sessionToken'];
         User user = User.fromJson(responseMap);
         store.dispatch(UserLoggedIn(user, sessionId));
-        store.dispatch(UserCheckInvite(user, action.context));
-        //Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
+        if (user.partner == null) {
+          store.dispatch(UserCheckInvite(user, action.context));
+        } else {
+          store.dispatch(AppInitialized(action.context));
+        }
 
         // We save it locally
         Map<String, dynamic> profileStorage = Map();
@@ -114,7 +117,9 @@ Middleware<AppState> _loadUserFromServer() {
     store.dispatch(UserApiLoadSteps.begin);
     User user = action.user;
 
-    String url = Environment.parseUrl + Environment.uriUser + "/${user.id}";
+    String url = Environment.parseUrl +
+        Environment.uriUser +
+        "/${user.id}?include=partner";
     http.get(url, headers: Environment.parseHeaders).then((response) {
       print("#########");
       print("Response status: ${response.statusCode}");
@@ -133,7 +138,12 @@ Middleware<AppState> _loadUserFromServer() {
         profileStorage["user"] = user.toJson();
         LocalRepository.setPerfil(profileStorage);
 
-        store.dispatch(UserCheckInvite(user, action.context));
+        if (user.partner == null) {
+          store.dispatch(UserCheckInvite(user, action.context));
+        } else {
+          store.dispatch(MessagesFetching());
+          store.dispatch(AppInitialized(action.context));
+        }
       } else {
         store.dispatch(UserApiLoadSteps.error);
       }
@@ -173,15 +183,69 @@ Middleware<AppState> _sendInvite() {
 
 Middleware<AppState> _checkInvite() {
   return (Store<AppState> store, action, NextDispatcher next) {
-    var email = store.state.userState.user.email;
+    User user = store.state.userState.user;
+    var email = user.email;
     String url = Environment.parseUrl +
         Environment.uriUserQuery +
-        "?where={\"invite\": \"$email\"}";
-    print(url);
+        "?where={\"\$or\":[{\"invite\": \"$email\"}, {\"partner\": { \"__type\": \"Pointer\", \"className\": \"_User\", \"objectId\": \"${store.state.userState.user.id}\" }}]}&include=partner";
     http.get(url, headers: Environment.parseHeaders).then((response) {
-      print(response);
+      if (response.statusCode == 200 && response.body != null) {
+        Map<String, dynamic> responseRaw = json.decode(response.body);
+        if (responseRaw['results'] != null &&
+            responseRaw['results'].length > 0) {
+          User partner = User.fromJson(responseRaw['results'][0]);
+          if (partner.partner != null) {
+            // Ya aceptó la invitación, hay que igualar las cuentas
+            store.dispatch(UserInvitedUpdate(partner, true));
 
-      Navigator.of(action.context).pushReplacementNamed(HomeScreen.route);
+            if (user.invite != null) {
+              user.invite = null;
+              user.partner = partner;
+
+              String url =
+                  Environment.parseUrl + Environment.uriUser + "/${user.id}";
+              Map<String, String> headers = Environment.parseHeaders;
+              headers["X-Parse-Session-Token"] =
+                  store.state.userState.sessionId;
+              print(json.encode(user.toJsonForApi()));
+              http.put(url,
+                  headers: headers, body: json.encode(user.toJsonForApi()));
+            }
+          } else {
+            store.dispatch(UserInvitedUpdate(partner, false));
+          }
+        }
+      }
+      store.dispatch(AppInitialized(action.context));
+    }).catchError((error) {
+      print(error);
+    });
+
+    next(action);
+  };
+}
+
+Middleware<AppState> _acceptInvite() {
+  return (Store<AppState> store, action, NextDispatcher next) {
+    store.dispatch(UserSendingInvite.begin);
+    User user = store.state.userState.user.cloneUser();
+    user.partner = store.state.userState.invitedFrom;
+
+    String url = Environment.parseUrl + Environment.uriUser + "/${user.id}";
+    Map<String, String> headers = Environment.parseHeaders;
+    headers["X-Parse-Session-Token"] = store.state.userState.sessionId;
+    print(json.encode(user.toJsonForApi()));
+    http
+        .put(url, headers: headers, body: json.encode(user.toJsonForApi()))
+        .then((response) {
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+      if (response.statusCode == 200) {
+        store.dispatch(UserSendingInvite.success);
+        store.dispatch(UserUpdate(user));
+      } else {
+        store.dispatch(UserSendingInvite.error);
+      }
     }).catchError((error) {
       print(error);
     });

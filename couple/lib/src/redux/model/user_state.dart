@@ -3,9 +3,16 @@ class UserState {
   int state;
   String sessionId;
   User user;
+  User invitedFrom;
+  bool connected;
 
   UserState(
-      {this.authenticated = false, this.state = 0, this.sessionId, this.user});
+      {this.authenticated = false,
+      this.state = 0,
+      this.sessionId,
+      this.user,
+      this.invitedFrom,
+      this.connected});
 
   @override
   String toString() {
@@ -19,7 +26,7 @@ class User {
   String nombre;
   String password;
   String invite;
-  String partnerId;
+  User partner;
 
   User({
     this.id,
@@ -27,7 +34,7 @@ class User {
     this.nombre,
     this.password,
     this.invite,
-    this.partnerId,
+    this.partner,
   });
 
   User cloneUser() {
@@ -37,7 +44,7 @@ class User {
         nombre: this.nombre,
         password: this.password,
         invite: this.invite,
-        partnerId: this.partnerId);
+        partner: this.partner);
   }
 
   @override
@@ -51,7 +58,17 @@ class User {
       email: json["email"] != null ? json["email"] : json["username"],
       password: json["password"],
       invite: json["invite"],
-      partnerId: json["partnerId"]);
+      partner: json["partner"] != null
+          ? User.fromJsonWithoutPartner(json["partner"])
+          : null);
+
+  static User fromJsonWithoutPartner(Map<String, dynamic> json) => User(
+      id: json["objectId"] != null ? json["objectId"] : json["id"],
+      nombre: json["name"],
+      email: json["email"] != null ? json["email"] : json["username"],
+      password: json["password"],
+      invite: json["invite"],
+      partner: null);
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -60,7 +77,6 @@ class User {
         'password': password,
         'username': email,
         'invite': invite,
-        'partnerId': partnerId,
       };
 
   Map<String, dynamic> toJsonForApi() => {
@@ -68,6 +84,14 @@ class User {
         'email': email,
         'username': email,
         'invite': invite,
-        'partnerId': partnerId,
+        'partner': partner != null ? userToPointer(partner) : null
       };
+
+  static Map<String, String> userToPointer(User user) {
+    Map<String, String> map = Map();
+    map['__type'] = "Pointer";
+    map['className'] = "_User";
+    map['objectId'] = user.id;
+    return map;
+  }
 }
