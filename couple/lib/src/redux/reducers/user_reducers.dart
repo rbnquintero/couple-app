@@ -4,67 +4,83 @@ import 'package:couple/src/redux/actions/user_actions.dart';
 import 'package:couple/src/redux/model/user_state.dart';
 
 Reducer<UserState> userReducer = combineReducers<UserState>([
+  new TypedReducer<UserState, UserLogin>(userLogIn),
+  new TypedReducer<UserState, UserRegister>(userLogIn),
   new TypedReducer<UserState, UserLoggedIn>(userLoggedIn),
-  new TypedReducer<UserState, UserLoginSteps>(userLogInState),
-  new TypedReducer<UserState, UserUpdate>(userUpdated),
-  new TypedReducer<UserState, UserInvitedUpdate>(userInviteUpdated),
+  new TypedReducer<UserState, UserLoginOrRegisterError>(
+      userLoginOrRegisterError),
+  new TypedReducer<UserState, UserUpdated>(userDataLoaded),
+  new TypedReducer<UserState, UserInvitedUpdate>(userInviteUpdate),
 ]);
 
-UserState userLogInState(UserState userState, UserLoginSteps step) {
-  if (step == UserLoginSteps.begin) {
-    return UserState(
-        authenticated: false,
-        state: 1,
-        sessionId: null,
-        user: null,
-        invitedFrom: null,
-        connected: false);
-  } else if (step == UserLoginSteps.success) {
-    return UserState(
-        authenticated: userState.authenticated,
-        state: 2,
-        sessionId: userState.sessionId,
-        user: userState.user,
-        invitedFrom: userState.invitedFrom,
-        connected: userState.connected);
-  } else if (step == UserLoginSteps.error) {
-    return UserState(
-        authenticated: false,
-        state: 3,
-        sessionId: null,
-        user: null,
-        invitedFrom: userState.invitedFrom,
-        connected: userState.connected);
-  }
+UserState userLogIn(UserState userOldState, action) {
+  UserState userState = UserState(
+      authenticated: false,
+      state: 1,
+      error: null,
+      updating: false,
+      user: null,
+      invitedFrom: null,
+      connected: null);
   return userState;
 }
 
-UserState userLoggedIn(UserState userOldState, UserLoggedIn action) {
+UserState userLoggedIn(UserState userOldState, action) {
   UserState userState = UserState(
       authenticated: true,
-      sessionId: action.sessionId,
+      state: 2,
+      error: null,
+      updating: false,
       user: action.user,
-      invitedFrom: userOldState.invitedFrom,
-      connected: userOldState.connected);
+      invitedFrom: null,
+      connected: null);
   return userState;
 }
 
-UserState userUpdated(UserState userOldState, UserUpdate action) {
+UserState userLoginOrRegisterError(UserState userOldState, action) {
   UserState userState = UserState(
-      authenticated: userOldState.authenticated,
-      sessionId: userOldState.sessionId,
-      user: action.user,
-      invitedFrom: userOldState.invitedFrom,
-      connected: userOldState.connected);
+      authenticated: false,
+      state: -1,
+      error: action.error,
+      updating: false,
+      user: userOldState.user,
+      invitedFrom: null,
+      connected: null);
   return userState;
 }
 
-UserState userInviteUpdated(UserState userOldState, UserInvitedUpdate action) {
+UserState userDataLoaded(UserState userOldState, UserUpdated action) {
+  UserState userState = UserState(
+      authenticated: true,
+      state: action.state,
+      error: null,
+      updating: false,
+      user: action.user,
+      invitedFrom: null,
+      connected: null);
+  return userState;
+}
+
+UserState userUpdating(UserState userOldState, UserUpdating action) {
   UserState userState = UserState(
       authenticated: userOldState.authenticated,
-      sessionId: userOldState.sessionId,
+      state: userOldState.state,
+      error: action.error,
+      updating: action.updating,
+      user: userOldState.user,
+      invitedFrom: null,
+      connected: null);
+  return userState;
+}
+
+UserState userInviteUpdate(UserState userOldState, UserInvitedUpdate action) {
+  UserState userState = UserState(
+      authenticated: userOldState.authenticated,
+      state: 3,
+      error: userOldState.error,
+      updating: userOldState.updating,
       user: userOldState.user,
       invitedFrom: action.invitedFrom,
-      connected: action.connected);
+      connected: null);
   return userState;
 }

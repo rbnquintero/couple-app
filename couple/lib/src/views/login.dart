@@ -37,9 +37,9 @@ class LoginWidgetState extends State<LoginWidget> {
   final PageController _controller = PageController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final Map<String, String> _formData = {
-    'email': null,
-    'password': null,
-    'name': null
+    'email': '',
+    'password': '',
+    'name': ''
   };
   LoginStage loginStage = LoginStage.init;
 
@@ -116,32 +116,59 @@ class LoginWidgetState extends State<LoginWidget> {
     if (loginStage == LoginStage.signup) {
       widget.store.dispatch(
         UserRegister(
-          _registerSuccess,
           User(
             id: null,
             email: _formData['email'],
-            nombre: _formData['name'],
+            name: _formData['name'],
             password: _formData['password'],
           ),
+          _registerSuccessOrError,
+          context,
         ),
       );
     } else {
       widget.store.dispatch(
         UserLogin(
-          context,
           User(
             email: _formData['email'],
             password: _formData['password'],
           ),
+          _loginSuccessOrError,
+          context,
         ),
       );
     }
   }
 
-  void _registerSuccess(User user) {
-    changeLogin(LoginStage.signin);
-    print("success registry: ${user.id}");
-    submit();
+  void _loginSuccessOrError() {
+    print("LOGIN");
+    UserState userState = widget.store.state.userState;
+    if (!userState.authenticated && userState.state == -1) {
+      if (userState.error == 'USUARIO_NO_REGISTRADO') {
+        changeLogin(LoginStage.signup);
+      }
+    }
+  }
+
+  void _registerSuccessOrError() {
+    print("REGISTER");
+  }
+
+  Widget signUpOrSignInMessage() {
+    String message = "";
+    String error = widget.store.state.userState.error;
+    if (error != null) {
+      if (error == "USUARIO_NO_REGISTRADO")
+        message =
+            "User not registered. Insert your name to create an account for you.";
+    }
+    if (message.length > 0) {
+      return Container(
+        padding: EdgeInsets.only(top: 20),
+        child: Text(message),
+      );
+    }
+    return Container();
   }
 
   Widget _buildSignupOrSignInButtons() {
@@ -153,12 +180,21 @@ class LoginWidgetState extends State<LoginWidget> {
           decoration: BoxDecoration(color: Color.fromRGBO(255, 255, 255, 0.5)),
           child: Column(
             children: <Widget>[
+              signUpOrSignInMessage(),
               loginStage == LoginStage.signup
-                  ? NameTextInput((String value) => _formData['name'] = value)
+                  ? NameTextInput(
+                      (String value) => _formData['name'] = value,
+                      initialValue: _formData['name'],
+                    )
                   : Container(),
-              EmailTextInput((String value) => _formData['email'] = value),
+              EmailTextInput(
+                (String value) => _formData['email'] = value,
+                initialValue: _formData['email'],
+              ),
               PasswordTextInput(
-                  (String value) => _formData['password'] = value),
+                (String value) => _formData['password'] = value,
+                initialValue: _formData['password'],
+              ),
               SizedBox(
                 height: 10.0,
               ),
@@ -172,6 +208,10 @@ class LoginWidgetState extends State<LoginWidget> {
         ),
       ),
     );
+  }
+
+  Widget _loading() {
+    return Text("Loading ${_formData['email']}");
   }
 
   @override
@@ -194,7 +234,9 @@ class LoginWidgetState extends State<LoginWidget> {
             _buildPageView(),
             loginStage == LoginStage.init
                 ? _buildInitButtons()
-                : _buildSignupOrSignInButtons(),
+                : widget.store.state.userState.state <= 0
+                    ? _buildSignupOrSignInButtons()
+                    : _loading(),
           ],
         ),
       ),

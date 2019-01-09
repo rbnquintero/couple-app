@@ -140,13 +140,15 @@ class IconLeftButton extends StatelessWidget {
 /** INPUTS */
 class NameTextInput extends StatelessWidget {
   final Function onSaved;
-  NameTextInput(this.onSaved);
+  final String initialValue;
+  NameTextInput(this.onSaved, {this.initialValue = ""});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       decoration: InputDecoration(labelText: 'Name'),
       keyboardType: TextInputType.emailAddress,
+      initialValue: initialValue,
       validator: (String value) {
         if (value.isEmpty || value.length < 2) {
           return 'Name invalid';
@@ -159,7 +161,8 @@ class NameTextInput extends StatelessWidget {
 
 class PasswordTextInput extends StatelessWidget {
   final Function onSaved;
-  PasswordTextInput(this.onSaved);
+  final String initialValue;
+  PasswordTextInput(this.onSaved, {this.initialValue = ""});
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +170,7 @@ class PasswordTextInput extends StatelessWidget {
       decoration: InputDecoration(labelText: 'Password'),
       obscureText: true,
       keyboardType: TextInputType.emailAddress,
+      initialValue: initialValue,
       validator: (String value) {
         if (value.isEmpty || value.length < 6) {
           return 'Password invalid';
@@ -179,13 +183,15 @@ class PasswordTextInput extends StatelessWidget {
 
 class EmailTextInput extends StatelessWidget {
   final Function onSaved;
-  EmailTextInput(this.onSaved);
+  final String initialValue;
+  EmailTextInput(this.onSaved, {this.initialValue = ""});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       decoration: InputDecoration(labelText: 'Email'),
       keyboardType: TextInputType.emailAddress,
+      initialValue: initialValue,
       validator: (String value) {
         if (value.isEmpty ||
             !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")

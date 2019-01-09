@@ -2,15 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:couple/src/redux/model/user_state.dart';
 
 class UserRegister {
-  final Function success;
   final User user;
-  UserRegister(this.success, this.user);
+  final Function callback;
+  final BuildContext context;
+  UserRegister(this.user, this.callback, this.context);
 }
 
 class UserLogin {
-  final BuildContext context;
   final User user;
-  UserLogin(this.context, this.user);
+  final Function callback;
+  final BuildContext context;
+  UserLogin(this.user, this.callback, this.context);
+}
+
+class UserLoginOrRegisterError {
+  final String error;
+  UserLoginOrRegisterError(this.error);
+}
+
+class UserLoggedIn {
+  final User user;
+  UserLoggedIn(this.user);
 }
 
 class UserLoad {
@@ -24,39 +36,36 @@ class UserLoadFromApi {
   UserLoadFromApi(this.user, this.context);
 }
 
-class UserSendInvite {
-  final User user;
-  final String invite;
-  UserSendInvite(this.user, this.invite);
-}
-
-enum UserLoadSteps { begin, success, error }
-enum UserRegisterSteps { begin, success, error }
-enum UserLoginSteps { begin, success, error }
-enum UserApiLoadSteps { begin, success, error }
-enum UserSendingInvite { begin, success, error }
-
-class UserLoggedIn {
-  final User user;
-  final String sessionId;
-  UserLoggedIn(this.user, this.sessionId);
-}
-
 class UserCheckInvite {
   final User user;
   final BuildContext context;
   UserCheckInvite(this.user, this.context);
 }
 
-class UserUpdate {
+class UserUpdated {
   final User user;
-  UserUpdate(this.user);
+  final int state;
+  UserUpdated(this.user, {this.state = 3});
+}
+
+class UserSendInvite {
+  final User user;
+  final String invite;
+  UserSendInvite(this.user, this.invite);
+}
+
+class UserUpdating {
+  final String error;
+  final bool updating;
+  UserUpdating({this.error, this.updating = false});
 }
 
 class UserInvitedUpdate {
   final User invitedFrom;
-  final bool connected;
-  UserInvitedUpdate(this.invitedFrom, this.connected);
+  UserInvitedUpdate(this.invitedFrom);
 }
 
-class UserAcceptInvite {}
+class UserAcceptInvite {
+  final BuildContext context;
+  UserAcceptInvite(this.context);
+}

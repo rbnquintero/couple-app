@@ -15,7 +15,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  # firebase
+  firebase_auth: ^0.6.6
+  cloud_firestore: ^0.8.2+3
   # redux stuff
   flutter_redux: ^0.5.2
   redux_logging: ^0.3.0

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:core';
 
 //REDUX
 import 'package:flutter_redux/flutter_redux.dart';
@@ -59,7 +60,7 @@ class MessageCard extends StatelessWidget {
     }
     if (message.fecha != null) {
       DateFormat formatter = DateFormat('h:mm a');
-      DateTime time = DateTime.parse(message.fecha);
+      DateTime time = DateTime.fromMicrosecondsSinceEpoch(int.tryParse(message.fecha));
       date = formatter.format(time);
     }
     return Column(

@@ -1,7 +1,8 @@
 class UserState {
   bool authenticated;
-  int state;
-  String sessionId;
+  int state; // Error: -1, LoggingIn:1, LoggedIn: 2, DataComplete:3
+  bool updating;
+  String error;
   User user;
   User invitedFrom;
   bool connected;
@@ -9,21 +10,22 @@ class UserState {
   UserState(
       {this.authenticated = false,
       this.state = 0,
-      this.sessionId,
+      bool updating = false,
       this.user,
+      this.error,
       this.invitedFrom,
       this.connected});
 
   @override
   String toString() {
-    return "{init:$authenticated, state:$state, user:$user, session:$sessionId}";
+    return "{authenticated:$authenticated, state:$state, user:$user, updating:$updating}";
   }
 }
 
 class User {
   String id;
   String email;
-  String nombre;
+  String name;
   String password;
   String invite;
   User partner;
@@ -31,7 +33,7 @@ class User {
   User({
     this.id,
     this.email,
-    this.nombre,
+    this.name,
     this.password,
     this.invite,
     this.partner,
@@ -41,7 +43,7 @@ class User {
     return User(
         id: this.id,
         email: this.email,
-        nombre: this.nombre,
+        name: this.name,
         password: this.password,
         invite: this.invite,
         partner: this.partner);
@@ -49,12 +51,12 @@ class User {
 
   @override
   String toString() {
-    return "id:$id, email:$email, nombre:$nombre";
+    return "id:$id, email:$email, name:$name";
   }
 
   static User fromJson(Map<String, dynamic> json) => User(
       id: json["objectId"] != null ? json["objectId"] : json["id"],
-      nombre: json["name"],
+      name: json["name"],
       email: json["email"] != null ? json["email"] : json["username"],
       password: json["password"],
       invite: json["invite"],
@@ -64,7 +66,7 @@ class User {
 
   static User fromJsonWithoutPartner(Map<String, dynamic> json) => User(
       id: json["objectId"] != null ? json["objectId"] : json["id"],
-      nombre: json["name"],
+      name: json["name"],
       email: json["email"] != null ? json["email"] : json["username"],
       password: json["password"],
       invite: json["invite"],
@@ -72,7 +74,7 @@ class User {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'name': nombre,
+        'name': name,
         'email': email,
         'password': password,
         'username': email,
@@ -80,7 +82,7 @@ class User {
       };
 
   Map<String, dynamic> toJsonForApi() => {
-        'name': nombre,
+        'name': name,
         'email': email,
         'username': email,
         'invite': invite,

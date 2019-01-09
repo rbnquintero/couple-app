@@ -8,6 +8,7 @@ import 'package:couple/src/redux/actions/nav_actions.dart';
 
 import 'package:couple/src/views/pair.dart';
 import 'package:couple/src/views/home.dart';
+import 'package:couple/src/views/login.dart';
 
 import 'package:couple/src/views/chat/chat_view.dart';
 
@@ -39,6 +40,8 @@ Middleware<AppState> _appInitialized() {
       Navigator.of(action.context).pushReplacementNamed(Home.route);
     } else if (store.state.userState.authenticated) {
       Navigator.of(action.context).pushReplacementNamed(PairScreen.route);
+    } else {
+      Navigator.of(action.context).pushReplacementNamed(LoginScreen.route);
     }
     next(action);
   };

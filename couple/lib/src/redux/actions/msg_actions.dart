@@ -14,7 +14,8 @@ class MessagesFetch {
 
 class SendMessage {
   final String message;
-  SendMessage(this.message);
+  final int type; // type: 0 = text, 1 = image, 2 = sticker
+  SendMessage(this.message, {this.type = 0});
 }
 
 class PushMessage {
