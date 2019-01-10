@@ -6,6 +6,34 @@ import 'package:couple/src/redux/model/user_state.dart';
 import 'package:couple/src/redux/model/msg_state.dart';
 import 'package:couple/src/redux/actions/msg_actions.dart';
 
+import 'package:redux_epics/redux_epics.dart';
+import 'package:rxdart/rxdart.dart';
+
+final createStoreMsgEpics = combineEpics<AppState>([messagesEpic]);
+
+Stream<dynamic> messagesEpic(
+    Stream<dynamic> actions, EpicStore<AppState> store) {
+  return Observable(actions)
+      .ofType(TypeToken<RequestMessagesDataEventsAction>())
+      .flatMap((RequestMessagesDataEventsAction requestAction) {
+    return getMessages(requestAction.chatId)
+        .map((List<DocumentSnapshot> list) => ProcessMessages(list))
+        .takeUntil(actions
+            .where((action) => action is CancelMessagesDataEventsAction));
+  });
+}
+
+Observable<List<DocumentSnapshot>> getMessages(String chatId) {
+  return new Observable(Firestore.instance
+          .collection("messages")
+          .document(chatId)
+          .collection(chatId)
+          .orderBy('timestamp', descending: true)
+          .limit(20)
+          .snapshots())
+      .map((QuerySnapshot query) => query.documents);
+}
+
 List<Middleware<AppState>> createStoreMsgMiddleware() {
   final fetchMessages = _fetchMessages();
   final sendMessage = _sendMessage();
@@ -16,7 +44,23 @@ List<Middleware<AppState>> createStoreMsgMiddleware() {
 }
 
 Middleware<AppState> _fetchMessages() {
-  return (Store<AppState> store, action, NextDispatcher next) {};
+  return (Store<AppState> store, action, NextDispatcher next) {
+    User partner = store.state.userState.user.partner;
+    User user = store.state.userState.user;
+
+    String groupChatId = "";
+    if (user.id.hashCode <= partner.id.hashCode) {
+      groupChatId = '${user.id}-${partner.id}';
+    } else {
+      groupChatId = '${partner.id}-${user.id}';
+    }
+
+    store.dispatch(MessagesChatId(groupChatId));
+
+    store.dispatch(RequestMessagesDataEventsAction(groupChatId));
+
+    next(action);
+  };
 }
 
 Middleware<AppState> _sendMessage() {
@@ -26,8 +70,8 @@ Middleware<AppState> _sendMessage() {
 
     Message message = Message(
       message: action.message,
-      to: partner,
-      from: user,
+      to: partner.id,
+      from: user.id,
     );
     store.dispatch(PushMessage(message));
 

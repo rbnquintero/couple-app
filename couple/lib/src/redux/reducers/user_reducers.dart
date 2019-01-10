@@ -11,6 +11,7 @@ Reducer<UserState> userReducer = combineReducers<UserState>([
       userLoginOrRegisterError),
   new TypedReducer<UserState, UserUpdated>(userDataLoaded),
   new TypedReducer<UserState, UserInvitedUpdate>(userInviteUpdate),
+  new TypedReducer<UserState, UserLogOut>(userLogOut),
 ]);
 
 UserState userLogIn(UserState userOldState, action) {
@@ -81,6 +82,18 @@ UserState userInviteUpdate(UserState userOldState, UserInvitedUpdate action) {
       updating: userOldState.updating,
       user: userOldState.user,
       invitedFrom: action.invitedFrom,
+      connected: null);
+  return userState;
+}
+
+UserState userLogOut(UserState userOldState, action) {
+  UserState userState = UserState(
+      authenticated: false,
+      state: 0,
+      error: null,
+      updating: false,
+      user: null,
+      invitedFrom: null,
       connected: null);
   return userState;
 }

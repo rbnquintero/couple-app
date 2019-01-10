@@ -69,3 +69,8 @@ class UserAcceptInvite {
   final BuildContext context;
   UserAcceptInvite(this.context);
 }
+
+class UserLogOut {
+  final BuildContext context;
+  UserLogOut(this.context);
+}

@@ -17,6 +17,7 @@ List<Middleware<AppState>> createStoreUserMiddleware() {
   final sendInvite = _sendInvite();
   final checkInvite = _checkInvite();
   final acceptInvite = _acceptInvite();
+  final logOut = _logOut();
   return [
     TypedMiddleware<AppState, UserRegister>(createUser),
     TypedMiddleware<AppState, UserLogin>(loginUser),
@@ -25,6 +26,7 @@ List<Middleware<AppState>> createStoreUserMiddleware() {
     TypedMiddleware<AppState, UserCheckInvite>(checkInvite),
     TypedMiddleware<AppState, UserSendInvite>(sendInvite),
     TypedMiddleware<AppState, UserAcceptInvite>(acceptInvite),
+    TypedMiddleware<AppState, UserLogOut>(logOut),
   ];
 }
 
@@ -235,6 +237,16 @@ Middleware<AppState> _acceptInvite() {
           updating: false, error: "Error al actualizar la info del usuario"));
     });
 
+    next(action);
+  };
+}
+
+Middleware<AppState> _logOut() {
+  return (Store<AppState> store, action, NextDispatcher next) {
+    store.dispatch(CancelMessagesDataEventsAction());
+
+    LocalRepository.setPerfil(null);
+    store.dispatch(InitApp(action.context));
     next(action);
   };
 }

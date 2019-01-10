@@ -1,38 +1,69 @@
 import 'package:redux/redux.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:couple/src/redux/actions/msg_actions.dart';
 import 'package:couple/src/redux/model/msg_state.dart';
 
 Reducer<MessagesState> messagesReducer = combineReducers<MessagesState>([
+  new TypedReducer<MessagesState, MessagesChatId>(messagesChatId),
   new TypedReducer<MessagesState, MessagesFetching>(messagesReceiving),
   new TypedReducer<MessagesState, MessagesFetchingError>(
       messagesReceivingError),
   new TypedReducer<MessagesState, MessagesFetch>(messagesReceived),
   new TypedReducer<MessagesState, PushMessage>(pushMessage),
   new TypedReducer<MessagesState, PushMessageUpdated>(pushMessageUpdate),
+  new TypedReducer<MessagesState, ProcessMessages>(processMessages),
+  new TypedReducer<MessagesState, CancelMessagesDataEventsAction>(cleanSlate),
 ]);
+
+MessagesState messagesChatId(MessagesState msgOldState, MessagesChatId action) {
+  return MessagesState(
+    fetching: msgOldState.fetching,
+    error: msgOldState.error,
+    messages: msgOldState.messages,
+    chatId: action.chatId,
+  );
+}
 
 MessagesState messagesReceiving(
     MessagesState msgOldState, MessagesFetching action) {
   return MessagesState(
-      fetching: true, error: null, messages: msgOldState.messages);
+    fetching: true,
+    error: null,
+    messages: msgOldState.messages,
+    chatId: msgOldState.chatId,
+  );
 }
 
 MessagesState messagesReceivingError(
     MessagesState msgOldState, MessagesFetchingError action) {
   return MessagesState(
-      fetching: false, error: action.error, messages: msgOldState.messages);
+    fetching: false,
+    error: action.error,
+    messages: msgOldState.messages,
+    chatId: msgOldState.chatId,
+  );
 }
 
 MessagesState messagesReceived(
     MessagesState msgOldState, MessagesFetch action) {
-  return MessagesState(fetching: false, error: null, messages: action.messages);
+  return MessagesState(
+    fetching: false,
+    error: null,
+    messages: action.messages,
+    chatId: msgOldState.chatId,
+  );
 }
 
 MessagesState pushMessage(MessagesState msgOldState, PushMessage action) {
   List<Message> messages = msgOldState.messages;
   messages.insert(0, action.message);
-  return MessagesState(fetching: false, error: null, messages: messages);
+  return MessagesState(
+    fetching: false,
+    error: null,
+    messages: messages,
+    chatId: msgOldState.chatId,
+  );
 }
 
 MessagesState pushMessageUpdate(
@@ -47,5 +78,43 @@ MessagesState pushMessageUpdate(
       break;
     }
   }
-  return MessagesState(fetching: false, error: null, messages: messages);
+  return MessagesState(
+    fetching: false,
+    error: null,
+    messages: messages,
+    chatId: msgOldState.chatId,
+  );
+}
+
+MessagesState processMessages(
+    MessagesState msgOldState, ProcessMessages action) {
+  List<Message> messages = List();
+  Iterator<DocumentSnapshot> it = action.rawMessages.iterator;
+  while (it.moveNext()) {
+    DocumentSnapshot rawMessage = it.current;
+    Message message = Message(
+      id: rawMessage.documentID,
+      to: rawMessage.data['idTo'],
+      from: rawMessage.data['idFrom'],
+      message: rawMessage.data['content'],
+      fecha: rawMessage.data['timestamp'],
+    );
+    messages.add(message);
+  }
+  return MessagesState(
+    fetching: false,
+    error: null,
+    messages: messages,
+    chatId: msgOldState.chatId,
+  );
+}
+
+MessagesState cleanSlate(
+    MessagesState msgOldState, CancelMessagesDataEventsAction action) {
+  return MessagesState(
+    fetching: false,
+    error: null,
+    messages: [],
+    chatId: null,
+  );
 }

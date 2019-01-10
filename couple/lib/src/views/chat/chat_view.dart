@@ -14,10 +14,6 @@ class ChatHome extends StatelessWidget {
   static final String route = '/home/chat';
   static final String title = null;
 
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    print(state);
-  }
-
   @override
   Widget build(BuildContext context) {
     return StoreBuilder<AppState>(
@@ -54,13 +50,14 @@ class MessageCard extends StatelessWidget {
     Radius r = Radius.circular(10);
     BorderRadius radius =
         BorderRadius.only(topLeft: r, topRight: r, bottomRight: r);
-    if (message.from.id == user.id) {
+    if (message.from == user.id) {
       align = CrossAxisAlignment.end;
       radius = BorderRadius.only(topLeft: r, topRight: r, bottomLeft: r);
     }
     if (message.fecha != null) {
       DateFormat formatter = DateFormat('h:mm a');
-      DateTime time = DateTime.fromMicrosecondsSinceEpoch(int.tryParse(message.fecha));
+      DateTime time =
+          DateTime.fromMicrosecondsSinceEpoch(int.tryParse(message.fecha));
       date = formatter.format(time);
     }
     return Column(

@@ -192,6 +192,7 @@ class EmailTextInput extends StatelessWidget {
       decoration: InputDecoration(labelText: 'Email'),
       keyboardType: TextInputType.emailAddress,
       initialValue: initialValue,
+      autocorrect: false,
       validator: (String value) {
         if (value.isEmpty ||
             !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")

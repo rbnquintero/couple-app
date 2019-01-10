@@ -7,6 +7,7 @@ import 'package:couple/src/views/login.dart';
 import 'package:couple/src/views/pair.dart';
 import 'package:couple/src/views/home.dart';
 import 'package:couple/src/redux/actions/app_actions.dart';
+import 'package:couple/src/redux/actions/msg_actions.dart';
 
 class Couple extends StatelessWidget {
   @override

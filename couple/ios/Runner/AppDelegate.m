@@ -1,7 +1,6 @@
 #include "AppDelegate.h"
 #include "GeneratedPluginRegistrant.h"
 #import <UserNotifications/UserNotifications.h>
-#import <Parse.h>
 #import <Flutter/Flutter.h>
 
 @implementation AppDelegate
@@ -10,20 +9,16 @@
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
-    [self registerForRemoteNotifications];
+    /*[self registerForRemoteNotifications];
     [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error){
         if(!error){
             [[UIApplication sharedApplication] registerForRemoteNotifications];
         }
-    }];
+    }];*/
     
-    [Parse initializeWithConfiguration:[ParseClientConfiguration configurationWithBlock:^(id<ParseMutableClientConfiguration>  _Nonnull configuration) {
-        configuration.applicationId = @"HBGC7ACBv2Sov7jXfIzVanjcrIZSf1VGATW1NtrU";
-        configuration.clientKey = @"22xccshWspG5Yq6v3wlET8PNwjkSMqYd0EZOHFe6";
-        configuration.server = @"https://parseapi.back4app.com";
-    }]];
+    
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
-}
+}/*
 
 - (void)registerForRemoteNotifications {
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
@@ -57,6 +52,6 @@
                                                   methodChannelWithName:@"flutter.rbnquintero.com.channel"
                                                   binaryMessenger:controller];
     [notificationsChannel invokeMethod:@"notification" arguments:@"notification received"];
-}
+}*/
 
 @end

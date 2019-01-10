@@ -1,4 +1,10 @@
 import 'package:couple/src/redux/model/msg_state.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class MessagesChatId {
+  final String chatId;
+  MessagesChatId(this.chatId);
+}
 
 class MessagesFetching {}
 
@@ -26,4 +32,16 @@ class PushMessage {
 class PushMessageUpdated {
   final Message message;
   PushMessageUpdated(this.message);
+}
+
+class RequestMessagesDataEventsAction {
+  final String chatId;
+  RequestMessagesDataEventsAction(this.chatId);
+}
+
+class CancelMessagesDataEventsAction {}
+
+class ProcessMessages {
+  final List<DocumentSnapshot> rawMessages;
+  ProcessMessages(this.rawMessages);
 }

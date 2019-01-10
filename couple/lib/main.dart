@@ -4,6 +4,7 @@ import 'package:redux_thunk/redux_thunk.dart';
 import 'package:redux_logging/redux_logging.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter/services.dart';
+import 'package:redux_epics/redux_epics.dart';
 
 import 'package:couple/src/redux/actions/msg_actions.dart';
 import 'package:couple/src/redux/reducers/app_reducers.dart';
@@ -24,7 +25,7 @@ void main() {
         navState: NavState(),
         userState: UserState(),
         messagesState: MessagesState(messages: List())),
-    middleware: [thunkMiddleware]
+    middleware: [thunkMiddleware, EpicMiddleware(createStoreMsgEpics)]
       ..addAll(createStoreAppMiddleware())
       ..addAll(createStoreUserMiddleware())
       ..addAll(createStoreMsgMiddleware())
@@ -63,7 +64,7 @@ class CoupleAppState extends State<CoupleApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       print("changed!");
-      widget.store.dispatch(MessagesFetching());
+      //widget.store.dispatch(MessagesFetching());
     }
   }
 
@@ -71,7 +72,7 @@ class CoupleAppState extends State<CoupleApp> with WidgetsBindingObserver {
     switch (call.method) {
       case "notification":
         debugPrint(call.arguments);
-        widget.store.dispatch(MessagesFetching());
+        //widget.store.dispatch(MessagesFetching());
         return new Future.value("");
     }
   }
