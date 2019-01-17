@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:redux/redux.dart';
 import 'package:redux_thunk/redux_thunk.dart';
@@ -5,8 +6,8 @@ import 'package:redux_logging/redux_logging.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter/services.dart';
 import 'package:redux_epics/redux_epics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-import 'package:couple/src/redux/actions/msg_actions.dart';
 import 'package:couple/src/redux/reducers/app_reducers.dart';
 import 'package:couple/src/redux/reducers/app_middleware.dart';
 import 'package:couple/src/redux/reducers/user_middleware.dart';
@@ -47,11 +48,50 @@ class CoupleApp extends StatefulWidget {
 class CoupleAppState extends State<CoupleApp> with WidgetsBindingObserver {
   static const platform =
       const MethodChannel('flutter.rbnquintero.com.channel');
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    firebaseCloudMessagingListeners();
+
+    /*_firebaseMessaging.requestNotificationPermissions();
+    _firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
+      print("#########################");
+      print(message);
+      print("#########################");
+    });*/
+  }
+
+  void firebaseCloudMessagingListeners() {
+    if (Platform.isIOS) iOSPermission();
+
+    _firebaseMessaging.getToken().then((token) {
+      print(token);
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
+  }
+
+  void iOSPermission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
   }
 
   @override

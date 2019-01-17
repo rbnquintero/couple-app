@@ -1,6 +1,7 @@
 import 'package:redux/redux.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:couple/src/redux/model/app_state.dart';
 import 'package:couple/src/redux/actions/user_actions.dart';
@@ -66,6 +67,15 @@ Middleware<AppState> _loginUser() {
       store.dispatch(UserLoggedIn(user));
       action.callback();
       store.dispatch(UserLoadFromApi(user, action.context));
+
+      final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+      _firebaseMessaging.getToken().then((token) {
+        print(token);
+        Firestore.instance
+            .collection('users')
+            .document(user.id)
+            .updateData({'token': token});
+      });
     }).catchError((error) {
       if (error.code == 'Error 17011') {
         // Load Sign Up page
