@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:couple/src/redux/model/msg_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -20,8 +22,9 @@ class MessagesFetch {
 
 class SendMessage {
   final String message;
+  final File image;
   final int type; // type: 0 = text, 1 = image, 2 = sticker
-  SendMessage(this.message, {this.type = 0});
+  SendMessage(this.message, {this.type = 0, this.image});
 }
 
 class PushMessage {

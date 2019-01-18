@@ -116,6 +116,7 @@ MessagesState processMessages(
       from: rawMessage.data['idFrom'],
       message: rawMessage.data['content'],
       fecha: rawMessage.data['timestamp'],
+      type: rawMessage.data['type'],
     );
     messages.add(message);
   }

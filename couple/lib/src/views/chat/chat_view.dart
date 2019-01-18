@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:core';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 //REDUX
 import 'package:flutter_redux/flutter_redux.dart';
@@ -43,6 +46,13 @@ class MessageCard extends StatelessWidget {
   final Message message;
   final User user;
   MessageCard(this.message, this.user);
+
+  Widget constructImage(String url) {
+    return CachedNetworkImage(
+      imageUrl: url,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (message.id == "-1") {
@@ -53,7 +63,7 @@ class MessageCard extends StatelessWidget {
               decoration: BoxDecoration(
                   color: Color.fromRGBO(0, 0, 0, 0.3),
                   borderRadius: BorderRadius.all(Radius.circular(10))),
-                  padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
               child: Text(
                 message.fecha,
                 textAlign: TextAlign.center,
@@ -88,7 +98,9 @@ class MessageCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: align,
             children: <Widget>[
-              Text(message.message),
+              message.type == 0
+                  ? Text(message.message)
+                  : constructImage(message.message),
               SizedBox(height: 5),
               date == '-'
                   ? Icon(
@@ -129,12 +141,34 @@ class MessageFormState extends State<MessageForm> {
     widget.store.dispatch(SendMessage(text));
   }
 
+  Future getImage(ImageSource source) async {
+    File imageFile = await ImagePicker.pickImage(source: source);
+    if (imageFile != null) {
+      print(imageFile);
+      widget.store.dispatch(SendMessage("", type: 1, image: imageFile));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
       child: Row(
         children: <Widget>[
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 4.0),
+            child: IconButton(
+              icon: Icon(Icons.camera),
+              onPressed: () => getImage(ImageSource.camera),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 4.0),
+            child: IconButton(
+              icon: Icon(Icons.photo),
+              onPressed: () => getImage(ImageSource.gallery),
+            ),
+          ),
           Flexible(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
