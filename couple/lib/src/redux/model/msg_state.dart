@@ -1,5 +1,3 @@
-import 'package:couple/src/redux/model/user_state.dart';
-
 class MessagesState {
   final bool fetching;
   final String error;

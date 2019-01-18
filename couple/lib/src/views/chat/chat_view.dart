@@ -45,6 +45,24 @@ class MessageCard extends StatelessWidget {
   MessageCard(this.message, this.user);
   @override
   Widget build(BuildContext context) {
+    if (message.id == "-1") {
+      return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                  color: Color.fromRGBO(0, 0, 0, 0.3),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
+                  padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+              child: Text(
+                message.fecha,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ]);
+    }
+
     String date = "-";
     CrossAxisAlignment align = CrossAxisAlignment.start;
     Radius r = Radius.circular(10);
@@ -57,7 +75,7 @@ class MessageCard extends StatelessWidget {
     if (message.fecha != null) {
       DateFormat formatter = DateFormat('h:mm a');
       DateTime time =
-          DateTime.fromMicrosecondsSinceEpoch(int.tryParse(message.fecha));
+          DateTime.fromMillisecondsSinceEpoch(int.tryParse(message.fecha));
       date = formatter.format(time);
     }
     return Column(

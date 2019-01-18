@@ -1,5 +1,6 @@
 import 'package:redux/redux.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 import 'package:couple/src/redux/actions/msg_actions.dart';
 import 'package:couple/src/redux/model/msg_state.dart';
@@ -90,8 +91,25 @@ MessagesState processMessages(
     MessagesState msgOldState, ProcessMessages action) {
   List<Message> messages = List();
   Iterator<DocumentSnapshot> it = action.rawMessages.iterator;
+  String lastDay;
+  DateFormat formatter = DateFormat('dd MMMM');
   while (it.moveNext()) {
     DocumentSnapshot rawMessage = it.current;
+    try {
+      String day = formatter.format(DateTime.now());
+      if (lastDay == null) {
+        lastDay = formatter.format(DateTime.fromMillisecondsSinceEpoch(
+            int.tryParse(rawMessage.data['timestamp'])));
+      } else if (day != lastDay) {
+        Message message = Message(
+          id: "-1",
+          fecha: day,
+        );
+        messages.add(message);
+      }
+    } catch (err) {
+      print(err);
+    }
     Message message = Message(
       id: rawMessage.documentID,
       to: rawMessage.data['idTo'],
@@ -101,6 +119,12 @@ MessagesState processMessages(
     );
     messages.add(message);
   }
+
+  Message message = Message(
+    id: "-1",
+    fecha: lastDay,
+  );
+  messages.add(message);
   return MessagesState(
     fetching: false,
     error: null,
