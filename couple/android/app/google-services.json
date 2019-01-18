@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "872620151565",
+    "firebase_url": "https://couple-c110c.firebaseio.com",
+    "project_id": "couple-c110c",
+    "storage_bucket": "couple-c110c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872620151565:android:c6f2f6805cdacd29",
+        "android_client_info": {
+          "package_name": "com.rbnquintero.couple"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "872620151565-5v45rb4er9ejj6kvuku8m22fjrsb7j93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCe_q-i2w7AtzFumaEiej0QfOWv6Ha-blY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
