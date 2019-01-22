@@ -3,6 +3,7 @@ import 'dart:convert';
 
 class LocalRepository {
   static final String keyProfile = "key_perfil";
+  static final String keyMessages = "key_messages";
 
   static Future<Map<String, dynamic>> getPerfil() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

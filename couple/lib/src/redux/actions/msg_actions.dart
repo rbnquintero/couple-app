@@ -39,7 +39,8 @@ class PushMessageUpdated {
 
 class RequestMessagesDataEventsAction {
   final String chatId;
-  RequestMessagesDataEventsAction(this.chatId);
+  final String lastDataId;
+  RequestMessagesDataEventsAction(this.chatId, this.lastDataId);
 }
 
 class CancelMessagesDataEventsAction {}

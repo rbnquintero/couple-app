@@ -89,8 +89,18 @@ MessagesState pushMessageUpdate(
 
 MessagesState processMessages(
     MessagesState msgOldState, ProcessMessages action) {
-  List<Message> messages = List();
+  List<Message> messages = msgOldState.messages;
   Iterator<DocumentSnapshot> it = action.rawMessages.iterator;
+
+  if (action.rawMessages == null || action.rawMessages.length == 0) {
+    return MessagesState(
+      fetching: false,
+      error: null,
+      messages: messages,
+      chatId: msgOldState.chatId,
+    );
+  }
+
   String lastDay;
   DateFormat formatter = DateFormat('dd MMMM');
   while (it.moveNext()) {
@@ -102,7 +112,7 @@ MessagesState processMessages(
             int.tryParse(rawMessage.data['timestamp'])));
       } else if (day != lastDay) {
         Message message = Message(
-          id: "-1",
+          id: "-1" + day,
           fecha: day,
         );
         messages.add(message);
@@ -122,16 +132,33 @@ MessagesState processMessages(
   }
 
   Message message = Message(
-    id: "-1",
+    id: "-1" + lastDay,
     fecha: lastDay,
   );
   messages.add(message);
+
+  // Guardar los mensajes en el repo
+
   return MessagesState(
     fetching: false,
     error: null,
-    messages: messages,
+    messages: messages.toSet().toList(),
     chatId: msgOldState.chatId,
   );
+}
+
+void uniqifyList(List<dynamic> list) {
+  for (int i = 0; i < list.length; i++) {
+    dynamic o = list[i];
+    int index;
+    // Remove duplicates
+    do {
+      index = list.indexOf(o, i + 1);
+      if (index != -1) {
+        list.removeRange(index, 1);
+      }
+    } while (index != -1);
+  }
 }
 
 MessagesState cleanSlate(

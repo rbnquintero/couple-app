@@ -17,14 +17,26 @@ Stream<dynamic> messagesEpic(
   return Observable(actions)
       .ofType(TypeToken<RequestMessagesDataEventsAction>())
       .flatMap((RequestMessagesDataEventsAction requestAction) {
-    return getMessages(requestAction.chatId)
+    return getMessages(requestAction.chatId, requestAction.lastDataId)
         .map((List<DocumentSnapshot> list) => ProcessMessages(list))
         .takeUntil(actions
             .where((action) => action is CancelMessagesDataEventsAction));
   });
 }
 
-Observable<List<DocumentSnapshot>> getMessages(String chatId) {
+Observable<List<DocumentSnapshot>> getMessages(
+    String chatId, String lastDataId) {
+  if (lastDataId != null) {
+    return new Observable(Firestore.instance
+            .collection("messages")
+            .document(chatId)
+            .collection(chatId)
+            .startAt([lastDataId])
+            .orderBy('timestamp', descending: true)
+            .limit(20)
+            .snapshots())
+        .map((QuerySnapshot query) => query.documents);
+  }
   return new Observable(Firestore.instance
           .collection("messages")
           .document(chatId)
@@ -58,7 +70,17 @@ Middleware<AppState> _fetchMessages() {
 
     store.dispatch(MessagesChatId(groupChatId));
 
-    store.dispatch(RequestMessagesDataEventsAction(groupChatId));
+    String last;
+    if (store.state.messagesState.messages.length > 0) {
+      store.state.messagesState.messages.forEach((elem) {
+        if (!elem.id.startsWith("-1")) {
+          last = elem.id;
+          return;
+        }
+      });
+    }
+
+    store.dispatch(RequestMessagesDataEventsAction(groupChatId, last));
 
     next(action);
   };

@@ -3,8 +3,12 @@ class MessagesState {
   final String error;
   final List<Message> messages;
   final String chatId;
-  MessagesState(
-      {this.fetching = false, this.error, this.messages, this.chatId});
+  MessagesState({
+    this.fetching = false,
+    this.error,
+    this.messages,
+    this.chatId,
+  });
 
   @override
   String toString() {
@@ -21,6 +25,12 @@ class Message {
   final int type;
   Message(
       {this.id, this.message, this.from, this.to, this.fecha, this.type = 0});
+
+  @override
+  bool operator ==(o) => o is Message && o.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 
   @override
   String toString() {

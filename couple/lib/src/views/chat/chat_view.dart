@@ -24,20 +24,52 @@ class ChatHome extends StatelessWidget {
         return new Column(
           children: <Widget>[
             Flexible(
-              child: ListView.builder(
-                padding: new EdgeInsets.all(8),
-                reverse: true,
-                itemBuilder: (_, int index) {
-                  return MessageCard(store.state.messagesState.messages[index],
-                      store.state.userState.user);
-                },
-                itemCount: store.state.messagesState.messages.length,
-              ),
+              child: ChatList(store),
             ),
             MessageForm(store),
           ],
         );
       },
+    );
+  }
+}
+
+class ChatList extends StatefulWidget {
+  final Store<AppState> store;
+
+  ChatList(this.store);
+
+  @override
+  State<StatefulWidget> createState() {
+    return ChatListState();
+  }
+}
+
+class ChatListState extends State<ChatList> {
+  ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        widget.store.dispatch(MessagesFetching());
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: new EdgeInsets.all(8),
+      reverse: true,
+      itemBuilder: (_, int index) {
+        return MessageCard(widget.store.state.messagesState.messages[index],
+            widget.store.state.userState.user);
+      },
+      itemCount: widget.store.state.messagesState.messages.length,
     );
   }
 }
@@ -55,7 +87,7 @@ class MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.id == "-1") {
+    if (message.id.startsWith("-1")) {
       return Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
